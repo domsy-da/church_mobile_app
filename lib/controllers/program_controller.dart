@@ -5,7 +5,7 @@ class ProgramController extends ValueNotifier<int> {
   ProgramController() : super(0);
 
   String announcements = 'Insert Sabbath and mid-week announcements here.';
-  String selectedLanguage = 'Tagalog'; // Default selection: Tagalog or English
+  String selectedLanguage = 'Tagalog';
 
   void setLanguage(String lang) {
     selectedLanguage = lang;
@@ -78,6 +78,13 @@ class ProgramController extends ValueNotifier<int> {
       section: 'Sabbath School',
       title: 'Closing Prayer',
       person: 'Person 5',
+    ),
+    // ENTRY NO. 11: ANNOUNCEMENTS RIGHT AFTER SABBATH SCHOOL
+    ProgramItem(
+      id: 'ss_11',
+      section: 'Sabbath School',
+      title: 'Announcements',
+      person: 'Church Clerk / Elder',
     ),
 
     // --- DIVINE WORSHIP ---
@@ -219,6 +226,12 @@ class ProgramController extends ValueNotifier<int> {
   void nextStep() {
     if (value < programList.length - 1) {
       value++;
+    }
+  }
+
+  void previousStep() {
+    if (value > 0) {
+      value--;
     }
   }
 

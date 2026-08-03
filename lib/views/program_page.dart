@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../controllers/program_controller.dart';
-import 'local_video_player.dart'; // <--- 1. Import your new video player screen
+import 'full_screen_card_page.dart';
+import 'local_video_player.dart';
 import 'program_settings_page.dart';
 
 class ProgramPage extends StatefulWidget {
@@ -28,6 +29,18 @@ class _ProgramPageState extends State<ProgramPage> {
         title: const Text('Church Program'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.fullscreen),
+            tooltip: 'Full Screen Mode',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FullScreenCardPage(controller: _controller),
+                ),
+              );
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.settings),
             tooltip: 'Module Settings',
             onPressed: () async {
@@ -46,6 +59,7 @@ class _ProgramPageState extends State<ProgramPage> {
         valueListenable: _controller,
         builder: (context, currentIndex, child) {
           final activeItem = _controller.programList[currentIndex];
+          final isAnnouncements = activeItem.title == 'Announcements';
 
           return Column(
             children: [
@@ -59,15 +73,31 @@ class _ProgramPageState extends State<ProgramPage> {
                   padding: const EdgeInsets.all(20.0),
                   child: Column(
                     children: [
-                      Text(
-                        activeItem.section.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            activeItem.section.toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.fullscreen),
+                            tooltip: 'Landscape View',
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => FullScreenCardPage(controller: _controller),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 8),
                       Text(
                         activeItem.title,
                         textAlign: TextAlign.center,
@@ -80,6 +110,23 @@ class _ProgramPageState extends State<ProgramPage> {
                           style: TextStyle(fontSize: 16, color: Colors.grey[800]),
                         ),
                       ],
+
+                      // SHOW ANNOUNCEMENT BODY IF ACTIVE STEP IS ANNOUNCEMENTS
+                      if (isAnnouncements) ...[
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surface,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            _controller.announcements,
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ),
+                      ],
+
                       const SizedBox(height: 16),
 
                       // LANGUAGE SELECTION CHIPS FOR [VP]
@@ -107,7 +154,7 @@ class _ProgramPageState extends State<ProgramPage> {
                         const SizedBox(height: 12),
                       ],
 
-                      // ACTION BUTTONS (UPDATED PLAY BUTTON LOGIC HERE)
+                      // ACTION BUTTONS
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -118,7 +165,6 @@ class _ProgramPageState extends State<ProgramPage> {
                                     ? activeItem.tagalogVideoUrl
                                     : activeItem.englishVideoUrl;
 
-                                // 2. Check if a local video was uploaded & open video player screen
                                 if (activeFilePath != null && activeFilePath.isNotEmpty) {
                                   Navigator.push(
                                     context,
