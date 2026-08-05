@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/program_item_model.dart';
+import 'dart:convert'; 
+import 'package:shared_preferences/shared_preferences.dart'; 
 
 class ProgramController extends ValueNotifier<int> {
   ProgramController() : super(0);
@@ -241,9 +243,64 @@ class ProgramController extends ValueNotifier<int> {
     }
   }
 
-  void saveSettings(List<ProgramItem> updatedList, String newAnnouncements) {
+  void _syncLinkedRoles() {
+    // 1. Find source values from the main roles
+    String speakerPerson = '';
+    String keyTextPerson = '';
+    String tithesPerson = '';
+
+    for (var item in programList) {
+      if (item.id == 'dw_16' || item.id == 'dw_12') { // Speaker item ID
+        if (item.person.isNotEmpty) speakerPerson = item.person;
+      }
+      if (item.id == 'dw_10') { // Key Text Reader item ID
+        if (item.person.isNotEmpty) keyTextPerson = item.person;
+      }
+      if (item.id == 'dw_5') { // Tithes & Offering Reader item ID
+        if (item.person.isNotEmpty) tithesPerson = item.person;
+      }
+    }
+
+    // 2. Apply rules across the program list
+    for (var item in programList) {
+      // Prayer of Speaker (dw_4), Sermon, Benediction, Recessional/Closing Prayer linked to Speaker
+      if (item.id == 'dw_4' || item.id == 'dw_15') { 
+        if (speakerPerson.isNotEmpty) item.person = speakerPerson;
+      }
+
+      // Pastoral Prayer (dw_12) matches Key Text Reader
+      if (item.id == 'dw_12') {
+        if (keyTextPerson.isNotEmpty) item.person = keyTextPerson;
+      }
+
+      // Tithes & Offering Prayer (dw_8) matches Tithes & Offering Reader
+      if (item.id == 'dw_8') {
+        if (tithesPerson.isNotEmpty) item.person = tithesPerson;
+      }
+
+      // Introduction to the Speaker defaults to N/A
+      if (item.id == 'dw_13' || item.title.toLowerCase().contains('intro')) {
+        item.person = 'N/A';
+      }
+    }
+  }
+
+  // Update saveSettings to execute role synchronization automatically
+  Future<void> saveSettings(List<ProgramItem> updatedList, String newAnnouncements) async {
     programList = updatedList;
     announcements = newAnnouncements;
+
+    // Apply auto-linking rules before saving
+    _syncLinkedRoles();
+
+    final prefs = await SharedPreferences.getInstance();
+    final String encodedData = jsonEncode(
+      programList.map((item) => item.toJson()).toList(),
+    );
+
+    await prefs.setString('saved_program_list', encodedData);
+    await prefs.setString('saved_announcements', announcements);
+
     notifyListeners();
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../controllers/program_controller.dart';
 import '../models/program_item_model.dart';
+import 'import_json_page.dart';
 
 class ProgramSettingsPage extends StatefulWidget {
   final ProgramController controller;
@@ -55,10 +56,28 @@ class _ProgramSettingsPageState extends State<ProgramSettingsPage> {
         title: const Text('Program Settings'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.code),
+            tooltip: 'Import JSON',
+            onPressed: () async {
+              final updated = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ImportJsonPage(controller: widget.controller),
+                ),
+              );
+              if (updated == true) {
+                setState(() {
+                  // Refresh local UI copy with updated values from controller
+                  _editableList = List.from(widget.controller.programList);
+                });
+              }
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.save),
             tooltip: 'Save Settings',
             onPressed: _saveSettings,
-          )
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -80,9 +99,33 @@ class _ProgramSettingsPageState extends State<ProgramSettingsPage> {
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
-              'Program Participants & Offline Video Files',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Expanded(
+                  child: Text(
+                    'Program Participants & Offline Video Files',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    final updated = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ImportJsonPage(controller: widget.controller),
+                      ),
+                    );
+                    if (updated == true) {
+                      setState(() {
+                        _editableList = List.from(widget.controller.programList);
+                      });
+                    }
+                  },
+                  icon: const Icon(Icons.file_upload_outlined, size: 18),
+                  label: const Text('Import JSON', style: TextStyle(fontSize: 12)),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             ListView.builder(
@@ -92,6 +135,7 @@ class _ProgramSettingsPageState extends State<ProgramSettingsPage> {
               itemBuilder: (context, index) {
                 final item = _editableList[index];
                 return Card(
+                  key: ValueKey(item.id), // Preserves form field state on update
                   margin: const EdgeInsets.only(bottom: 12),
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
@@ -104,6 +148,7 @@ class _ProgramSettingsPageState extends State<ProgramSettingsPage> {
                         ),
                         const SizedBox(height: 8),
                         TextFormField(
+                          key: Key('person_${item.id}_${item.person}'),
                           initialValue: item.person,
                           decoration: const InputDecoration(
                             labelText: 'Participant / Person / Group',
@@ -126,7 +171,10 @@ class _ProgramSettingsPageState extends State<ProgramSettingsPage> {
                           const SizedBox(height: 12),
                           const Text(
                             'Select Downloaded Video File [VP]',
-                            style: TextStyle(fontWeight: FontWeight.w600, color: Colors.blueGrey),
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.blueGrey,
+                            ),
                           ),
                           const SizedBox(height: 8),
                           Row(
@@ -136,7 +184,9 @@ class _ProgramSettingsPageState extends State<ProgramSettingsPage> {
                                   onPressed: () => _pickVideo(item, true),
                                   icon: const Icon(Icons.file_upload_outlined),
                                   label: Text(
-                                    item.tagalogVideoUrl != null ? 'Tagalog Attached ✓' : 'Upload Tagalog',
+                                    item.tagalogVideoUrl != null
+                                        ? 'Tagalog Attached ✓'
+                                        : 'Upload Tagalog',
                                     style: const TextStyle(fontSize: 12),
                                   ),
                                 ),
@@ -147,7 +197,9 @@ class _ProgramSettingsPageState extends State<ProgramSettingsPage> {
                                   onPressed: () => _pickVideo(item, false),
                                   icon: const Icon(Icons.file_upload_outlined),
                                   label: Text(
-                                    item.englishVideoUrl != null ? 'English Attached ✓' : 'Upload English',
+                                    item.englishVideoUrl != null
+                                        ? 'English Attached ✓'
+                                        : 'Upload English',
                                     style: const TextStyle(fontSize: 12),
                                   ),
                                 ),
