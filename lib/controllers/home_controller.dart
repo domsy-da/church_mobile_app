@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
-import '../models/feature_card_model.dart';
-import '../views/program_page.dart';
 import 'program_controller.dart';
+import 'member_controller.dart'; // 1. Import MemberController
+import '../views/program_page.dart';
+import '../views/members_page.dart'; // 2. Import MembersPage
+import '../views/attendance_page.dart'; // 3. Import AttendancePage
+import '../models/feature_card_model.dart';
 
 class HomeController {
   final ProgramController programController = ProgramController();
-  // Fetch available feature navigation cards
+  final MemberController memberController = MemberController(); // 4. Instantiate MemberController
+
   List<FeatureCardModel> getFeatureCards(BuildContext context) {
     return [
+      // Feature 1: Church Program
       FeatureCardModel(
         title: 'Church Program',
         description: 'View and manage Sabbath School & Divine Worship program flow.',
@@ -21,33 +26,33 @@ class HomeController {
           );
         },
       ),
+
+      // Feature 2: Church Directory (CRUD)
       FeatureCardModel(
-        title: 'Feature Two',
-        description: 'Manage settings or perform actions.',
-        icon: Icons.settings_rounded,
+        title: 'Church Directory',
+        description: 'Add, edit, or remove church members and assign roles.',
+        icon: Icons.people_alt,
         onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Feature 2 clicked')),
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MembersPage(controller: memberController),
+            ),
           );
         },
       ),
+
+      // Feature 3: Sabbath Attendance
       FeatureCardModel(
-        title: 'Analytics',
-        description: 'View dashboard metrics and progress.',
-        icon: Icons.analytics_rounded,
+        title: 'Sabbath Attendance',
+        description: 'Track Sabbath attendance and view weekly reports.',
+        icon: Icons.how_to_reg,
         onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Analytics clicked')),
-          );
-        },
-      ),
-      FeatureCardModel(
-        title: 'Profile Settings',
-        description: 'Update user info and app preferences.',
-        icon: Icons.person_rounded,
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Profile clicked')),
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AttendancePage(controller: memberController),
+            ),
           );
         },
       ),
