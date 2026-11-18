@@ -5,11 +5,17 @@ import '../views/program_page.dart';
 import '../views/members_page.dart'; // 2. Import MembersPage
 import '../views/attendance_page.dart'; // 3. Import AttendancePage
 import '../models/feature_card_model.dart';
+import 'board_controller.dart';
+import '../views/board_agreements_page.dart';
+import 'quiz_controller.dart';
+import '../views/quiz_list_page.dart';
 
 class HomeController {
   final ProgramController programController = ProgramController();
   final MemberController memberController = MemberController(); // 4. Instantiate MemberController
-
+  final BoardController boardController = BoardController();
+  final QuizController quizController = QuizController();
+  
   List<FeatureCardModel> getFeatureCards(BuildContext context) {
     return [
       // Feature 1: Church Program
@@ -52,6 +58,37 @@ class HomeController {
             context,
             MaterialPageRoute(
               builder: (context) => AttendancePage(controller: memberController),
+            ),
+          );
+        },
+      ),
+      FeatureCardModel(
+        title: 'Board Resolutions & Rules',
+        description: 'View church policies, meeting agendas, and board agreements.',
+        icon: Icons.gavel,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BoardAgreementsPage(
+                controller: boardController,
+              ),
+            ),
+          );
+        },
+      ),
+      FeatureCardModel(
+        title: 'Bible Quizzes & Leaderboard',
+        description: 'Take quizzes, view answers, and track member scores.',
+        icon: Icons.quiz,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => QuizListPage(
+                quizController: quizController,
+                memberController: memberController,
+              ),
             ),
           );
         },
